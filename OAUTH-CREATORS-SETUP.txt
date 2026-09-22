@@ -1,0 +1,80 @@
+LunaVisual — OAuth YouTube / TikTok / Twitch
+============================================
+
+ВАЖНО
+-----
+OAuth используется только для доказательства владения аккаунтом и чтения статистики.
+Сайт НЕ запрашивает разрешения на публикацию, удаление видео, изменение канала и т.п.
+Это уменьшает риск для пользователей и достаточно для проверки ID + подписчиков.
+
+Общий callback для всех трёх платформ:
+  https://pdibtleothnnmihhrbcr.supabase.co/functions/v1/creator-oauth-callback
+
+После OAuth пользователь возвращается на:
+  https://lunavisual.ru/creators.html
+
+A) Google / YouTube
+-------------------
+1. Создайте OAuth Web Client в Google Cloud.
+2. Включите YouTube Data API v3.
+3. Добавьте callback URL выше в Authorized redirect URIs.
+4. Получите GOOGLE_CLIENT_ID и GOOGLE_CLIENT_SECRET.
+5. Приложение запрашивает read-only scope YouTube для channels.list mine=true.
+
+B) TikTok
+---------
+1. Создайте приложение на TikTok for Developers и включите Login Kit.
+2. Зарегистрируйте ТОЧНЫЙ callback URL выше (HTTPS, без query string).
+3. Запросите/одобрите scopes:
+   user.info.basic
+   user.info.profile
+   user.info.stats
+   video.list
+4. Получите TIKTOK_CLIENT_KEY и TIKTOK_CLIENT_SECRET.
+
+C) Twitch
+---------
+1. Создайте приложение в Twitch Developer Console.
+2. Добавьте callback URL выше.
+3. Получите TWITCH_CLIENT_ID и TWITCH_CLIENT_SECRET.
+4. Используются read-only scopes:
+   user:read:email
+   moderator:read:followers
+
+D) Secrets в Supabase
+---------------------
+Установите Supabase CLI, войдите и выполните из папки проекта:
+
+  supabase link --project-ref pdibtleothnnmihhrbcr
+
+  supabase secrets set SITE_URL="https://lunavisual.ru" \
+    GOOGLE_CLIENT_ID="..." \
+    GOOGLE_CLIENT_SECRET="..." \
+    TIKTOK_CLIENT_KEY="..." \
+    TIKTOK_CLIENT_SECRET="..." \
+    TWITCH_CLIENT_ID="..." \
+    TWITCH_CLIENT_SECRET="..."
+
+E) Deploy Edge Functions
+------------------------
+В папке проекта находятся:
+  supabase/functions/creator-oauth-start
+  supabase/functions/creator-oauth-callback
+  supabase/functions/creator-verify
+  supabase/functions/model-download-url
+
+В supabase/config.toml verify_jwt=false, потому что функции сами валидируют пользовательский
+Bearer token через Supabase Auth. Callback от OAuth-провайдера не имеет LunaVisual JWT.
+
+Выполните:
+  supabase functions deploy creator-oauth-start
+  supabase functions deploy creator-oauth-callback
+  supabase functions deploy creator-verify
+  supabase functions deploy model-download-url
+
+F) О проверке накрутки
+---------------------
+Официальные API не дают надёжного признака "этот подписчик бот" для всей аудитории.
+LunaVisual сохраняет официальное число подписчиков и рассчитывает вспомогательный quality_score
+по доступным метрикам (число видео, просмотры/лайки и т.д.). Аномальные аккаунты помечаются
+для ручной проверки администратором. Этот score нельзя считать доказательством накрутки.

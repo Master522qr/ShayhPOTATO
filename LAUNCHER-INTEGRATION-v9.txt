@@ -1,0 +1,17 @@
+LunaVisual launcher integration v9
+
+Сайт НЕ содержит лаунчер. Ссылку задаёт Admin/Super Admin на settings.html.
+Лаунчер должен входить через Supabase Auth тем же аккаунтом сайта и вызывать RPC get_lunavisual_launcher_state().
+
+Важные поля ответа:
+- subscription_active / subscription_expires_at / subscription_lifetime
+- alpha_active / alpha_until
+- models[] — выданная косметика с asset_path
+- force_logout_after — если значение новее времени локального входа, лаунчер должен завершить сессию и попросить войти снова
+- key_system_enabled + key_system_message + key_system_epoch
+- launcher_login_enabled
+- launcher_main_menu_enabled
+- launcher_cosmetics_enabled
+- launcher_social_enabled
+
+Если feature flag выключен, интерфейс должен честно показывать «Функция временно отключена администратором», а не ломаться молча.

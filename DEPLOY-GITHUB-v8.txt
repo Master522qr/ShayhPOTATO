@@ -1,0 +1,35 @@
+LunaVisual v8 — установка на GitHub Pages + Supabase
+
+1. GitHub Pages
+- Загружайте СОДЕРЖИМОЕ этого архива прямо в корень ветки, из которой публикуется Pages.
+- В корне обязательно должны лежать index.html, admin.html, settings.html, models.html, news.html, creators.html, CNAME и 404.html.
+- Не кладите всё внутрь дополнительной папки LunaVisual-site-v8, иначе GitHub Pages покажет 404.
+- CNAME уже содержит: lunavisual.ru
+- В Settings -> Pages включите Enforce HTTPS, когда DNS домена уже указывает на GitHub Pages.
+
+2. Supabase — существующая база
+- Если предыдущая схема уже установлена: выполните supabase_upgrade_v8.sql в SQL Editor.
+- Если база пустая: выполните supabase_setup.sql.
+- Для владельца/главы после регистрации один раз выполните в SQL Editor:
+  select public.bootstrap_lunavisual_owner('ВАША_ПОЧТА');
+  Почта владельца не хранится в HTML/JS.
+
+3. Edge Functions для YouTube/TikTok/Twitch
+Разверните:
+- creator-oauth-start
+- creator-oauth-callback
+- creator-verify
+- creator-admin-verify
+
+OAuth secrets должны быть только в Supabase Edge Function Secrets, не в GitHub Pages.
+
+4. Что исправлено
+- Добавлен 404.html и маршруты /admin/, /settings/, /models/, /news/, /creators/, /profile/.
+- Админ-панель снова содержит ключи, Alpha, аккаунты/роли, заявки блогеров, новости, модельки и заказы.
+- Admin и Super Admin могут разбирать заявки; только Super Admin меняет служебные права Admin/Super Admin.
+- Media — публичный ранг ниже Admin и сам по себе не даёт доступ в админку.
+- Настройки сайта: скидки, цены, launcher URL, поддержка, Telegram, Discord, FunPay.
+- Модельки: приватный файл доступен только владельцу модели; скачивание теперь работает через signed URL без отдельной model-download-url Edge Function.
+- В админке модель можно выдать/забрать вручную.
+- Для creator-заявок показывается активность за 7/14 дней. 0 публикаций за 7 дней блокирует заявку; 1–3 считается целевым темпом, больше 3 не блокирует.
+- Admin/Super Admin могут вручную перепроверить один канал или все подключённые каналы.
